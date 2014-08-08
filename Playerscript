@@ -1,0 +1,74 @@
+using UnityEngine;
+
+
+public class PlayerScript : MonoBehaviour
+{
+	//speed of character movement
+	private Vector2 speed =new Vector2(10,0);
+	private Vector2 movement;
+	//Animator component reference 
+	protected Animator myanim;
+
+	void Start(){
+		//get the animator
+		myanim = GetComponent<Animator> ();
+	}
+	
+	private void EnforceBounds()
+	{
+		// temp var to store position of our character 
+		Vector3 newPos = transform.position;
+		// temp var to store Camera.main
+		Camera mainCamera = Camera.main;
+		// Temp var to stor position of the camera
+		Vector3 CamPos = mainCamera.transform.position;
+		// gets half the width of the camera view 
+		float xdist = mainCamera.aspect * mainCamera.orthographicSize;
+		//adds half xdist width to middle co-ordinate x(0) to get max width
+		float xmax = CamPos.x + xdist;
+		//subtracts half xdist width to middle co-ordinate x(0) to get min width
+		float xmin=CamPos.x-xdist;
+		//checks value
+		if (newPos.x > xmax || newPos.x < xmin) {
+			//Clamp makes sure that position value not exceed xmax or not decrease xmin
+			newPos.x=Mathf.Clamp(newPos.x,xmin,xmax);
+		}
+		transform.position = newPos;
+		
+	}
+	
+	void Update()
+	{
+		if (myanim) {
+			              //gets the information of current state at index 0
+						AnimatorStateInfo stateinfo = myanim.GetCurrentAnimatorStateInfo (0);
+						if (stateinfo.nameHash == Animator.StringToHash ("Base Layer.Macho_idle")) {
+				                bool ifpress = Input.GetButton("Fire1");
+								if (ifpress) {
+					//set or unset the boolean value MachoWalk
+										myanim.SetBool ("MachoWalk", true);
+			
+										movement = new Vector2 (speed.x, 0);
+					                     
+					                      
+								} 
+
+					                
+				                 
+						}
+				}
+		EnforceBounds();
+
+	}
+	
+	void FixedUpdate(){
+			//apply velocity to rigidbody2D prior to fps
+				rigidbody2D.velocity = movement;
+			//stops velocity when buttons no longer pressed 
+				if(!Input.GetButton("Fire1"))  {
+			myanim.SetBool ("MachoWalk", false);
+			    rigidbody2D.velocity=Vector2.zero;
+				}
+}
+
+}
